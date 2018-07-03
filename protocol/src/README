@@ -2,4 +2,7 @@ fifo.v - simple fifo implementation
 tb_fifo.v - simple fifo tb
 fifos_interface.v - multiple fifos connection
 tb_fifos_interface.v - simple fifo interface tb
-strawman_rx_fsm.v - initial implementation of strawman fsm
+strawman_rx_fsm.v - initial implementation of strawman rx fsm
+strawman_tx_fsm.v - initial implementation of strawman tx fsm
+chiplet_sys.v - chiplet system top file
+tb_chiplet_sys.v - testbench for chiplet system
