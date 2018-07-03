@@ -28,14 +28,18 @@ module fifos_interface (
 
   // master core recieve information to interface (Recieve Response)
   i_mc_rresp_ren,
-  o_mc_rresp_outbits
+  o_mc_rresp_outbits,
+
+  // credits
+  o_credits_m2s,
+  o_credits_s2m
 
 );
 
   parameter FIFO_DEPTH = 32;
   parameter LOG2_FIFO_DEPTH = 5;
-  parameter DATA_LINE_WIDTH = 64;
-  parameter CONTROL_LINE_WIDTH = 6;
+  parameter DATA_LINE_WIDTH = 40;
+  parameter CONTROL_LINE_WIDTH = 0;
 
   input clk;
 
@@ -68,6 +72,13 @@ module fifos_interface (
   output [DATA_LINE_WIDTH+CONTROL_LINE_WIDTH-1:0] o_mc_rresp_outbits;
   wire w_mc_rresp_fifo_empty;
   wire w_mc_rresp_fifo_full;
+
+  /// credit system nets
+  output wire [LOG2_FIFO_DEPTH:0] o_credits_m2s;
+  output wire [LOG2_FIFO_DEPTH:0] o_credits_s2m;
+
+  reg [LOG2_FIFO_DEPTH:0] credits_m2s = FIFO_DEPTH;
+  reg [LOG2_FIFO_DEPTH:0] credits_s2m = FIFO_DEPTH;
 
   // Master core sends information from interface (Send Request) FIFOs
   fifo M_fifo_sreq (
@@ -121,6 +132,33 @@ module fifos_interface (
     .o_empty_flag(w_mc_rresp_fifo_empty),
     .o_full_flag(w_mc_rresp_fifo_full)
   );
+
+  // Credit-based counter system... For detecting credits - a custom FSM must be built
+  // for wormhole / full packet installation.....
+
+  // NEED TO VERIFY TODO
+  always @ (posedge clk) begin
+    if ((i_sc_rreq_ren) && (!w_sc_rreq_fifo_full)) begin
+      credits_m2s <= credits_m2s;
+    end else if ((i_sc_rreq_ren) && (credits_m2s < FIFO_DEPTH)) begin // fsm reads from fifo
+      credits_m2s <= credits_m2s + 1'b1;
+    end else if ((!w_sc_rreq_fifo_full) && (credits_m2s < FIFO_DEPTH)) begin // writes to fifo
+      credits_m2s <= credits_m2s - 1'b1;
+    end
+
+    if ((i_mc_rresp_ren) && (!w_mc_rresp_fifo_full)) begin
+      credits_s2m <= credits_s2m;
+    end else if ((i_mc_rresp_ren) && (credits_m2s < FIFO_DEPTH)) begin // fsm reads from fifo
+      credits_s2m <= credits_s2m + 1'b1;
+    end else if ((!w_mc_rresp_fifo_full) && (credits_m2s < FIFO_DEPTH)) begin // writes to fifo
+      credits_s2m <= credits_s2m - 1'b1;
+    end
+
+  end 
+  
+  assign o_credits_s2m = credits_s2m;
+  assign o_credits_m2s = credits_m2s;
+
 
 
 endmodule

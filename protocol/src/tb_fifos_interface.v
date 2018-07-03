@@ -10,8 +10,8 @@ module tb_fifos_interface ();
 
   parameter FIFO_DEPTH = 32;
   parameter LOG2_FIFO_DEPTH = 5;
-  parameter DATA_LINE_WIDTH = 64;
-  parameter CONTROL_LINE_WIDTH = 6;
+  parameter DATA_LINE_WIDTH = 40;
+  parameter CONTROL_LINE_WIDTH = 0;
 
   reg clk = 0;
 

@@ -10,8 +10,8 @@ module tb_fifo ();
 
   parameter FIFO_DEPTH = 32;
   parameter LOG2_FIFO_DEPTH = 5;
-  parameter DATA_LINE_WIDTH = 64;
-  parameter CONTROL_LINE_WIDTH = 6;
+  parameter DATA_LINE_WIDTH = 40;
+  parameter CONTROL_LINE_WIDTH = 0;
 
   reg clk, rd_en, wr_en;
   reg [DATA_LINE_WIDTH+CONTROL_LINE_WIDTH-1:0] data_in ;

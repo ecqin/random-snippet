@@ -19,8 +19,8 @@ module fifo (
 
   parameter FIFO_DEPTH = 32;
   parameter LOG2_FIFO_DEPTH = 5;
-  parameter DATA_LINE_WIDTH = 64;
-  parameter CONTROL_LINE_WIDTH = 6;
+  parameter DATA_LINE_WIDTH = 40;
+  parameter CONTROL_LINE_WIDTH = 0;
 
   //Inputs
   input clk;
@@ -58,7 +58,12 @@ module fifo (
 
     // read new entry from the head of the FIFO
     if ( (i_read_packet_en == 1'b1) && (FIFOvalid[head_pointer] == 1'b1) ) begin
-      o_read_packet = FIFO[head_pointer];
+      //if ( ((head_pointer + 1'b1)== tail_pointer) && (i_read_packet_en == 1'b1) && (i_write_packet_en == 1'b0)) begin // fix logic
+        //o_read_packet = 'b0; // invalid packet
+      //end else begin        
+        o_read_packet = FIFO[head_pointer];
+      //end
+
       FIFOvalid[head_pointer] = 1'b0;
 
       // increment head pointer in a circular buffer structure
@@ -68,6 +73,8 @@ module fifo (
         head_pointer = 'd0;
       end
 
+    end else begin
+      o_read_packet = 'b0; // Invalid packet
     end
 
   end
